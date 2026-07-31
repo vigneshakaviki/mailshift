@@ -27,38 +27,68 @@ credential custody.
 Requires Node.js 22 or newer.
 
 ```bash
-npm install
-npm run dev
+git clone https://github.com/vigneshakaviki/mailshift.git
+cd mailshift
+npm ci
+npm run dev -- --host 127.0.0.1
 ```
 
-Open the local URL shown by Vite. Create a passphrase of at least 12
-characters. There is no passphrase recovery.
+Open `http://127.0.0.1:5173`. On macOS:
 
-For a safe import, start with [`examples/accounts.csv`](examples/accounts.csv).
+```bash
+open http://127.0.0.1:5173
+```
+
+Create a passphrase of at least 12 characters. There is no passphrase
+recovery.
+
+### Load the realistic example
+
+Import-ready dataset:
+[`examples/gmail-to-proton.csv`](examples/gmail-to-proton.csv). It contains 30
+real services across identity, finance, government, health, security, work,
+shopping, social, and entertainment categories. All account data is fictional;
+file contains no usernames, email addresses, passwords, or recovery secrets.
+
+Inside Mailshift:
+
+1. Create encrypted workspace.
+2. Set migration route, for example `maya.old@gmail.com` →
+   `maya@proton.me`.
+3. Open **Accounts**.
+4. Select **Select safe CSV**.
+5. Choose `mailshift/examples/gmail-to-proton.csv`.
+6. Confirm `30 accounts added`.
+
+To print exact file path before choosing it:
+
+```bash
+pwd
+ls -lh examples/gmail-to-proton.csv
+```
+
+Mailshift imports through browser UI so data enters encrypted workspace.
 Allowed headers are `name`, `title`, `domain`, `url`, `website`, and
-`category`.
+`category`. Native password-manager exports usually contain credential columns
+and will be rejected; create a redacted URL-only copy first.
+
+### Run production build locally
+
+```bash
+npm run build
+npm run preview -- --host 127.0.0.1
+```
+
+Open `http://127.0.0.1:4173`.
 
 ## Real example: moving from Gmail to Proton
 
 Maya has used `maya.old@gmail.com` for 12 years. She wants to close that
 dependency before October 31 and use `maya@proton.me` everywhere. Her password
-manager contains more than 200 entries, but she starts with these high-impact
-accounts:
+manager contains more than 200 entries. Importable example contains 30
+high-impact accounts:
 
-```csv
-name,domain,category
-Google Account,google.com,identity
-Apple Account,apple.com,identity
-PayPal,paypal.com,finance
-Chase,chase.com,finance
-IRS,irs.gov,government
-Hospital portal,examplehospital.org,health
-1Password,1password.com,security
-GitHub,github.com,work
-Amazon,amazon.com,shopping
-Discord,discord.com,social
-Spotify,spotify.com,entertainment
-```
+[`examples/gmail-to-proton.csv`](examples/gmail-to-proton.csv)
 
 This file contains service names and domains only. It deliberately excludes
 email addresses, usernames, passwords, one-time codes, and notes. Mailshift
@@ -81,13 +111,13 @@ included in the completion report.
 
 Mailshift deduplicates domains and builds this approximate queue:
 
-1. Google Account and Apple Account — identity roots.
-2. Chase and PayPal — money and payment recovery.
-3. IRS — government identity.
-4. Hospital portal — health records and appointment access.
-5. 1Password — security infrastructure.
-6. GitHub — work identity and commit attribution.
-7. Amazon, Discord, and Spotify — lower-risk services.
+1. Apple, Google, and Microsoft — identity roots.
+2. Chase, Coinbase, PayPal, and Wise — money and payment recovery.
+3. HealthCare.gov, IRS, and Social Security — government identity.
+4. CVS Health and Walgreens — health records and prescriptions.
+5. 1Password and Bitwarden — security infrastructure.
+6. AWS, Dropbox, GitHub, GitLab, Slack, and Zoom — work identity.
+7. Shopping, social, and entertainment services — lower-risk accounts.
 
 If Chase becomes blocked while support reviews the request, setting its status
 to `blocked` keeps it near the top. Completed and intentionally retained
@@ -121,13 +151,13 @@ and fresh-login gates pass; old-address removal remains separately tracked.
 
 ### 4. Handle a service without a playbook
 
-The hospital portal has no reviewed guide. Maya opens its official support
-channel and uses Mailshift's neutral support-request template:
+CVS Health has no reviewed guide in starter directory. Maya opens its official
+support channel and uses Mailshift's neutral support-request template:
 
 ```text
-Subject: Request to update the email address on my Hospital portal account
+Subject: Request to update the email address on my CVS Health account
 
-Hello Hospital portal support,
+Hello CVS Health support,
 
 I am retiring the email address currently associated with my account and need
 to replace it with a new address while preserving my account data, purchases,

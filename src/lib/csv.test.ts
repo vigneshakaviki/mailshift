@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import gmailToProtonCsv from '../../examples/gmail-to-proton.csv?raw'
 import { parseSafeCsv } from './csv'
 
 describe('safe CSV import', () => {
@@ -46,5 +47,19 @@ describe('safe CSV import', () => {
     expect(() =>
       parseSafeCsv('name,domain,unexpected\nExample,example.com,value'),
     ).toThrow(/unsupported column/)
+  })
+
+  it('imports the complete Gmail-to-Proton example without duplicates', () => {
+    const accounts = parseSafeCsv(gmailToProtonCsv)
+    const domains = new Set(accounts.map((account) => account.domain))
+
+    expect(accounts).toHaveLength(30)
+    expect(domains.size).toBe(30)
+    expect(accounts.find((account) => account.domain === 'github.com')).toMatchObject(
+      {
+        playbookId: 'github',
+        category: 'work',
+      },
+    )
   })
 })

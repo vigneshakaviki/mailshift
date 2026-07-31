@@ -1,0 +1,31 @@
+name,domain,category
+Google Account,google.com,identity
+Apple Account,apple.com,identity
+Microsoft Account,microsoft.com,identity
+PayPal,paypal.com,finance
+Chase,chase.com,finance
+Wise,wise.com,finance
+Coinbase,coinbase.com,finance
+IRS,irs.gov,government
+Social Security,ssa.gov,government
+HealthCare.gov,healthcare.gov,government
+CVS Health,cvs.com,health
+Walgreens,walgreens.com,health
+1Password,1password.com,security
+Bitwarden,bitwarden.com,security
+GitHub,github.com,work
+GitLab,gitlab.com,work
+Amazon Web Services,aws.amazon.com,work
+Dropbox,dropbox.com,work
+Slack,slack.com,work
+Zoom,zoom.us,work
+Amazon,amazon.com,shopping
+eBay,ebay.com,shopping
+Etsy,etsy.com,shopping
+LinkedIn,linkedin.com,social
+Reddit,reddit.com,social
+Discord,discord.com,social
+Netflix,netflix.com,entertainment
+Spotify,spotify.com,entertainment
+Steam,steampowered.com,entertainment
+YouTube,youtube.com,entertainment
