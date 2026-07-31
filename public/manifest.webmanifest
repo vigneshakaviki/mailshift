@@ -1,0 +1,16 @@
+{
+  "name": "Mailshift",
+  "short_name": "Mailshift",
+  "description": "Private, local-first account and email migration tracker.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f4f0e6",
+  "theme_color": "#171713",
+  "icons": [
+    {
+      "src": "/mailshift.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}
