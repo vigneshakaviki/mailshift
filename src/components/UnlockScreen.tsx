@@ -7,6 +7,7 @@ interface UnlockScreenProps {
   onCreate: (passphrase: string) => Promise<void>
   onUnlock: (passphrase: string) => Promise<void>
   onImportBackup: (contents: string) => Promise<void>
+  onResetVault: () => void
 }
 
 export function UnlockScreen({
@@ -16,11 +17,14 @@ export function UnlockScreen({
   onCreate,
   onUnlock,
   onImportBackup,
+  onResetVault,
 }: UnlockScreenProps) {
   const backupRef = useRef<HTMLInputElement>(null)
   const [passphrase, setPassphrase] = useState('')
   const [confirmation, setConfirmation] = useState('')
   const [localError, setLocalError] = useState('')
+  const [resetValue, setResetValue] = useState('')
+  const [showReset, setShowReset] = useState(false)
 
   async function submit(event: FormEvent) {
     event.preventDefault()
@@ -72,8 +76,9 @@ export function UnlockScreen({
         <p className="eyebrow">Private account continuity</p>
         <h1 id="unlock-title">Leave no account behind.</h1>
         <p className="unlock-lede">
-          Find every service tied to an old email. Move login and recovery
-          paths. Verify access before the address disappears.
+          Find every service tied to an old email. Plan the email change,
+          move login and recovery paths, and verify access before the address
+          disappears.
         </p>
         <div className="privacy-strip">
           <span>Encrypted locally</span>
@@ -83,11 +88,13 @@ export function UnlockScreen({
       </section>
 
       <section className="unlock-panel">
-        <p className="step-label">{hasVault ? 'Welcome back' : 'Create vault'}</p>
-        <h2>{hasVault ? 'Unlock migration' : 'Protect your migration plan'}</h2>
+        <p className="step-label">
+          {hasVault ? 'Existing vault found' : 'No vault yet'}
+        </p>
+        <h2>{hasVault ? 'Unlock workspace' : 'Create new workspace'}</h2>
         <p className="muted">
           {hasVault
-            ? 'Passphrase never leaves this browser.'
+            ? 'Enter passphrase to unlock this browser vault.'
             : 'Mailshift encrypts account names and email addresses before saving them.'}
         </p>
 
@@ -132,9 +139,13 @@ export function UnlockScreen({
           </button>
         </form>
 
-        {!hasVault ? (
-          <div className="backup-import">
-            <span>Already have an encrypted backup?</span>
+        <div className="backup-import">
+          <span>
+            {hasVault
+              ? 'Forgot passphrase? Restore from backup if you have one.'
+              : 'Already have an encrypted backup?'}
+          </span>
+          {!hasVault ? (
             <input
               ref={backupRef}
               className="visually-hidden"
@@ -142,6 +153,8 @@ export function UnlockScreen({
               accept=".json,application/json"
               onChange={importBackup}
             />
+          ) : null}
+          {!hasVault ? (
             <button
               className="text-button"
               type="button"
@@ -150,13 +163,65 @@ export function UnlockScreen({
             >
               Import backup
             </button>
-          </div>
-        ) : null}
+          ) : null}
+        </div>
 
         <div className="warning-note">
           <strong>No passphrase recovery.</strong> Losing it makes local data
           unreadable. Encrypted backup recommended.
         </div>
+
+        {hasVault ? (
+          <div className="backup-import">
+            <span>Need clean start? Reset local vault in this browser.</span>
+            {!showReset ? (
+              <button
+                className="text-button"
+                type="button"
+                disabled={busy}
+                onClick={() => setShowReset(true)}
+              >
+                Start reset
+              </button>
+            ) : (
+              <div className="stack">
+                <label>
+                  Type RESET
+                  <input
+                    value={resetValue}
+                    onChange={(event) => setResetValue(event.target.value)}
+                    autoComplete="off"
+                  />
+                </label>
+                <div className="button-row">
+                  <button
+                    className="button button--quiet"
+                    type="button"
+                    disabled={busy}
+                    onClick={() => {
+                      setShowReset(false)
+                      setResetValue('')
+                    }}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    className="button button--danger"
+                    type="button"
+                    disabled={busy || resetValue !== 'RESET'}
+                    onClick={() => {
+                      onResetVault()
+                      setShowReset(false)
+                      setResetValue('')
+                    }}
+                  >
+                    Reset vault
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        ) : null}
       </section>
     </main>
   )
