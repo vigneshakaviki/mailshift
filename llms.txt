@@ -11,6 +11,9 @@ Private, local-first email migration tracker.
 
 ## Best starting points
 
+- [Project website](https://vigneshakaviki.github.io/mailshift/)
+- [Browser app](https://vigneshakaviki.github.io/mailshift/app/)
+- [Account migration guide](https://vigneshakaviki.github.io/mailshift/blog/move-identities-not-only-mail/)
 - [README](README.md)
 - [Docs index](docs/index.md)
 - [Playbooks](src/data/playbooks.ts)
@@ -34,7 +37,7 @@ npm run preview -- --host 127.0.0.1
 
 ## Example data
 
-- [Gmail to Proton sample CSV](examples/gmail-to-proton.csv)
+- [50-service Gmail to Proton sample CSV](examples/gmail-to-proton.csv)
 
 ## Important behavior
 

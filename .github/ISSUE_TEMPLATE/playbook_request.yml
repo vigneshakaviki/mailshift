@@ -1,0 +1,48 @@
+name: Provider playbook request
+description: Request or improve official email-change guidance for a service
+title: "[Playbook]: "
+labels: [playbook]
+body:
+  - type: markdown
+    attributes:
+      value: Request public provider guidance only. Do not include your account details, support transcript, email address, or credentials.
+  - type: input
+    id: service
+    attributes:
+      label: Service name
+      placeholder: Example Service
+    validations:
+      required: true
+  - type: input
+    id: domain
+    attributes:
+      label: Official domain
+      placeholder: example.com
+    validations:
+      required: true
+  - type: input
+    id: settings
+    attributes:
+      label: Official account settings URL
+      placeholder: https://example.com/account/settings
+    validations:
+      required: true
+  - type: input
+    id: help
+    attributes:
+      label: Official help article
+      placeholder: https://support.example.com/change-email
+  - type: textarea
+    id: notes
+    attributes:
+      label: Public workflow notes
+      description: Mention known restrictions or verification steps, using only public sources.
+  - type: checkboxes
+    id: source_check
+    attributes:
+      label: Source check
+      options:
+        - label: These links are on domains controlled by the provider.
+          required: true
+        - label: This request contains no private account data or secrets.
+          required: true

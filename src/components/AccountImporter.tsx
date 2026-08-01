@@ -47,6 +47,7 @@ export function AccountImporter({ onImport }: AccountImporterProps) {
         ref={fileRef}
         className="visually-hidden"
         type="file"
+        aria-label="Select credential-free account CSV"
         accept=".csv,text/csv"
         onChange={readFile}
       />

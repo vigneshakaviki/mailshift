@@ -4,6 +4,9 @@ Start here:
 
 - [README](../README.md)
 - [Machine-readable index](../llms.txt)
+- [Project website](https://vigneshakaviki.github.io/mailshift/)
+- [Browser app](https://vigneshakaviki.github.io/mailshift/app/)
+- [Account migration guide](https://vigneshakaviki.github.io/mailshift/blog/move-identities-not-only-mail/)
 
 Core implementation:
 

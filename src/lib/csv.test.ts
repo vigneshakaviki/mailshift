@@ -63,8 +63,8 @@ describe('safe CSV import', () => {
     const accounts = parseSafeCsv(gmailToProtonCsv)
     const domains = new Set(accounts.map((account) => account.domain))
 
-    expect(accounts).toHaveLength(30)
-    expect(domains.size).toBe(30)
+    expect(accounts).toHaveLength(50)
+    expect(domains.size).toBe(50)
     expect(accounts.find((account) => account.domain === 'github.com')).toMatchObject(
       {
         playbookId: 'github',

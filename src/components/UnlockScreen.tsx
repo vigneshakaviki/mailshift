@@ -150,6 +150,7 @@ export function UnlockScreen({
               ref={backupRef}
               className="visually-hidden"
               type="file"
+              aria-label="Import encrypted Mailshift backup"
               accept=".json,application/json"
               onChange={importBackup}
             />

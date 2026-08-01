@@ -23,7 +23,7 @@ describe('playbook catalog', () => {
 
   it('covers every service in the bundled migration example', () => {
     const accounts = parseSafeCsv(exampleCsv)
-    expect(accounts).toHaveLength(30)
+    expect(accounts).toHaveLength(50)
     expect(accounts.every((account) => account.playbookId)).toBe(true)
   })
 })

@@ -1,6 +1,18 @@
 # Mailshift
 
-Private, local-first email migration tracker for changing email address, updating recovery paths, and moving accounts safely.
+[![CI](https://github.com/vigneshakaviki/mailshift/actions/workflows/ci.yml/badge.svg)](https://github.com/vigneshakaviki/mailshift/actions/workflows/ci.yml)
+[![Try Mailshift](https://img.shields.io/badge/try-browser_app-b8471f)](https://vigneshakaviki.github.io/mailshift/app/)
+[![License: MIT](https://img.shields.io/badge/license-MIT-245c49)](LICENSE)
+
+Private, local-first tracker for changing an email address, updating recovery
+paths, and moving accounts safely.
+
+[Website](https://vigneshakaviki.github.io/mailshift/) ·
+[Try in your browser](https://vigneshakaviki.github.io/mailshift/app/) ·
+[Read the migration guide](https://vigneshakaviki.github.io/mailshift/blog/move-identities-not-only-mail/) ·
+[Security model](#privacy-and-threat-model)
+
+[![Mailshift — move identities, not only mail](https://vigneshakaviki.github.io/mailshift/og.png)](https://vigneshakaviki.github.io/mailshift/)
 
 Machine-readable index: [llms.txt](llms.txt)
 
@@ -26,6 +38,17 @@ into a prioritized account migration checklist with source-linked playbooks.
 Mailshift has no backend, analytics, mailbox connection, automated login, or
 credential custody.
 
+## Try it now
+
+Open the [browser app](https://vigneshakaviki.github.io/mailshift/app/), create
+a vault passphrase of at least 12 characters, and import the
+[50-service example](examples/gmail-to-proton.csv). The hosted build is the
+same static application in this repository: workspace data stays encrypted in
+that browser and is not sent to a Mailshift server.
+
+For maximum assurance, inspect the source and use the local build below. A
+compromised device, browser extension, or deployment can still expose data.
+
 ## Quick start
 
 Requires Node.js 22 or newer.
@@ -49,7 +72,7 @@ recovery.
 ### Load the realistic example
 
 Import-ready dataset:
-[`examples/gmail-to-proton.csv`](examples/gmail-to-proton.csv). It contains 30
+[`examples/gmail-to-proton.csv`](examples/gmail-to-proton.csv). It contains 50
 real services across identity, finance, government, health, security, work,
 shopping, social, and entertainment categories. Use it as a Gmail to Proton
 email migration example. All account data is fictional; file contains no
@@ -63,7 +86,7 @@ Inside Mailshift:
 3. Open **Accounts**.
 4. Select **Select safe CSV**.
 5. Choose `mailshift/examples/gmail-to-proton.csv`.
-6. Confirm `30 accounts added`.
+6. Confirm `50 accounts added`.
 
 To print exact file path before choosing it:
 
@@ -90,7 +113,7 @@ Open `http://127.0.0.1:4173`.
 
 Maya has used `maya.old@gmail.com` for 12 years. She wants to close that
 dependency before October 31 and use `maya@proton.me` everywhere. Her password
-manager contains more than 200 entries. Importable example contains 30
+manager contains more than 200 entries. Importable example contains 50
 high-impact accounts for a real email address change workflow:
 
 [`examples/gmail-to-proton.csv`](examples/gmail-to-proton.csv)
