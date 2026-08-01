@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { findKnownSite } from '../data/knownSites'
 import type {
   Account,
   Checklist,
@@ -61,6 +62,7 @@ export function AccountDetail({
 }: AccountDetailProps) {
   const closeButtonRef = useRef<HTMLButtonElement>(null)
   const [templateCopied, setTemplateCopied] = useState(false)
+  const knownSite = playbook ? undefined : findKnownSite(account.domain)
 
   useEffect(() => {
     closeButtonRef.current?.focus()
@@ -204,8 +206,26 @@ Thank you.`
             </article>
           ) : (
             <div className="manual-note">
-              No verified playbook yet. Find official account documentation.
-              Never submit credentials through Mailshift.
+              <strong>
+                {knownSite
+                  ? 'Popular site recognized; verified playbook pending.'
+                  : 'No verified playbook yet.'}
+              </strong>{' '}
+              Find official account documentation. Never submit credentials
+              through Mailshift. Popularity does not verify domain safety or
+              ownership; confirm the address before signing in.
+              {knownSite ? (
+                <div className="button-row">
+                  <a
+                    className="button button--quiet"
+                    href={`https://${knownSite.domain}`}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    Open catalog domain ↗
+                  </a>
+                </div>
+              ) : null}
             </div>
           )}
 

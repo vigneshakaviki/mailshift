@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from 'react'
+import { findKnownSite } from '../data/knownSites'
 import { findPlaybook } from '../data/playbooks'
 import { CATEGORIES, type Account, type Category } from '../types'
 import { createAccount, normalizeDomain } from '../lib/workspace'
@@ -17,9 +18,10 @@ export function AddAccountForm({ onAdd }: AddAccountFormProps) {
     const normalized = normalizeDomain(domain)
     if (!normalized) return
     const playbook = findPlaybook(normalized)
+    const knownSite = findKnownSite(normalized)
     onAdd(
       createAccount({
-        name: name.trim() || playbook?.name || normalized,
+        name: name.trim() || playbook?.name || knownSite?.name || normalized,
         domain: normalized,
         category: playbook?.category ?? category,
         source: 'manual',

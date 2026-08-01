@@ -1,3 +1,4 @@
+import { findKnownSite } from '../data/knownSites'
 import { findPlaybook } from '../data/playbooks'
 import type { Account, Category } from '../types'
 import { CATEGORIES } from '../types'
@@ -111,6 +112,7 @@ export function parseSafeCsv(input: string): Account[] {
     const domain = normalizeDomain(row[domainIndex] ?? '')
     if (!domain) continue
     const playbook = findPlaybook(domain)
+    const knownSite = findKnownSite(domain)
     const requestedCategory = row[categoryIndex]?.trim().toLowerCase()
     const category: Category =
       requestedCategory &&
@@ -120,7 +122,7 @@ export function parseSafeCsv(input: string): Account[] {
 
     accounts.push(
       createAccount({
-        name: row[nameIndex]?.trim() || playbook?.name || domain,
+        name: row[nameIndex]?.trim() || playbook?.name || knownSite?.name || domain,
         domain,
         category,
         source: 'safe_csv',

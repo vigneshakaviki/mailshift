@@ -1,5 +1,9 @@
 import { useDeferredValue, useMemo, useState } from 'react'
-import { PLAYBOOKS } from '../data/playbooks'
+import {
+  KNOWN_SITE_COUNT,
+  searchKnownSites,
+} from '../data/knownSites'
+import { findPlaybook, PLAYBOOKS } from '../data/playbooks'
 
 export function PlaybookLibrary() {
   const [query, setQuery] = useState('')
@@ -14,6 +18,15 @@ export function PlaybookLibrary() {
       ),
     [deferredQuery],
   )
+  const knownSites = useMemo(
+    () =>
+      deferredQuery
+        ? searchKnownSites(deferredQuery, 40)
+            .filter((site) => !findPlaybook(site.domain))
+            .slice(0, 24)
+        : [],
+    [deferredQuery],
+  )
 
   return (
     <div className="playbooks-page">
@@ -22,8 +35,8 @@ export function PlaybookLibrary() {
           <p className="eyebrow">Open service directory</p>
           <h1>Instructions decay. Sources matter.</h1>
           <p>
-            Every guide links to official documentation and carries verification
-            date.
+            Search {PLAYBOOKS.length} source-linked guides plus{' '}
+            {KNOWN_SITE_COUNT.toLocaleString()} recognized popular domains.
           </p>
         </div>
         <label className="search-field search-field--large">
@@ -88,6 +101,58 @@ export function PlaybookLibrary() {
           </article>
         ))}
       </div>
+
+      {deferredQuery && knownSites.length > 0 ? (
+        <section aria-labelledby="known-sites-heading">
+          <div className="section-heading">
+            <div>
+              <p className="step-label">Broader catalog</p>
+              <h2 id="known-sites-heading">Recognized sites</h2>
+              <p>Generic safe workflow available; reviewed guide pending.</p>
+            </div>
+          </div>
+          <div className="playbook-grid">
+            {knownSites.map((site) => (
+              <article className="playbook-card" key={site.domain}>
+                <div className="playbook-card__top">
+                  <span
+                    className="service-avatar service-avatar--large"
+                    aria-hidden="true"
+                  >
+                    {site.name.slice(0, 1)}
+                  </span>
+                  <div>
+                    <h2>{site.name}</h2>
+                    <p>{site.domain}</p>
+                  </div>
+                  <span className="category category--other">catalog</span>
+                </div>
+                <p>
+                  Domain recognized from popularity data, not trust verification.
+                  Confirm it before using official settings and checklist.
+                </p>
+                <div className="button-row">
+                  <a
+                    className="button button--secondary"
+                    href={`https://${site.domain}`}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    Open catalog domain ↗
+                  </a>
+                </div>
+              </article>
+            ))}
+          </div>
+        </section>
+      ) : null}
+
+      {deferredQuery && playbooks.length === 0 && knownSites.length === 0 ? (
+        <div className="empty-state">
+          <strong>No catalog match</strong>
+          <p>Add domain manually; generic migration checklist still works.</p>
+        </div>
+      ) : null}
     </div>
   )
 }

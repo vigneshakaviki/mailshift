@@ -1168,6 +1168,10 @@ textarea::placeholder {
   margin: 1rem 0;
 }
 
+.manual-note .button-row {
+  margin-top: 0.75rem;
+}
+
 .playbook-steps {
   display: grid;
   gap: 0.65rem;
