@@ -2,11 +2,13 @@
   "name": "mailshift",
   "private": true,
   "version": "0.1.0",
+  "description": "Private, local-first email migration tracker for changing email address and moving accounts safely.",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
     "preview": "vite preview",
+    "update:sites": "node scripts/update-site-catalog.mjs",
     "lint": "eslint .",
     "test": "vitest run",
     "test:watch": "vitest",

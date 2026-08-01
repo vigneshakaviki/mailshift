@@ -34,6 +34,16 @@ describe('safe CSV import', () => {
     })
   })
 
+  it('names recognized domains without claiming a verified guide', () => {
+    const [account] = parseSafeCsv('domain\nwikipedia.org')
+
+    expect(account).toMatchObject({
+      name: 'Wikipedia',
+      domain: 'wikipedia.org',
+      playbookId: undefined,
+    })
+  })
+
   it.each(['password', 'username', 'email', 'recovery_code', 'otp'])(
     'rejects a %s column',
     (unsafeHeader) => {

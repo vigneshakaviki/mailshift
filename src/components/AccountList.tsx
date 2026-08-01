@@ -1,4 +1,5 @@
 import { useDeferredValue, useMemo, useState } from 'react'
+import { findKnownSite } from '../data/knownSites'
 import type { Account, MigrationStatus } from '../types'
 import { STATUSES } from '../types'
 import { sortByPriority } from '../lib/workspace'
@@ -10,6 +11,11 @@ interface AccountListProps {
   onAdd: (account: Account) => void
   onImport: (accounts: Account[]) => { added: number; skipped: number }
   onOpen: (account: Account) => void
+}
+
+function guideLabel(account: Account): string {
+  if (account.playbookId) return 'Verified'
+  return findKnownSite(account.domain) ? 'Known site' : 'Manual'
 }
 
 export function AccountList({
@@ -129,7 +135,7 @@ export function AccountList({
                 <span className={`status status--${account.status}`}>
                   {account.status.replace('_', ' ')}
                 </span>
-                <span>{account.playbookId ? 'Verified' : 'Manual'}</span>
+                <span>{guideLabel(account)}</span>
                 <span className="row-arrow" aria-hidden="true">
                   →
                 </span>
