@@ -2,7 +2,7 @@ import { useDeferredValue, useMemo, useState } from 'react'
 import { findKnownSite } from '../data/knownSites'
 import type { Account, MigrationStatus } from '../types'
 import { STATUSES } from '../types'
-import { sortByPriority } from '../lib/workspace'
+import { isRecheckDue, sortByPriority } from '../lib/workspace'
 import { AccountImporter } from './AccountImporter'
 import { AddAccountForm } from './AddAccountForm'
 
@@ -132,8 +132,14 @@ export function AccountList({
                 <span className={`category category--${account.category}`}>
                   {account.category}
                 </span>
-                <span className={`status status--${account.status}`}>
-                  {account.status.replace('_', ' ')}
+                <span
+                  className={`status status--${
+                    isRecheckDue(account) ? 'waiting' : account.status
+                  }`}
+                >
+                  {isRecheckDue(account)
+                    ? 'recheck due'
+                    : account.status.replace('_', ' ')}
                 </span>
                 <span>{guideLabel(account)}</span>
                 <span className="row-arrow" aria-hidden="true">

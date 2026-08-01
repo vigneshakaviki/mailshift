@@ -33,7 +33,8 @@ into a prioritized account migration checklist with source-linked playbooks.
   migration workflow.
 - Copies a neutral support-request template without including credentials.
 - Stores the workspace in an AES-256-GCM encrypted browser vault.
-- Exports a restorable encrypted backup and a credential-free completion CSV.
+- Exports a manually downloadable, restorable encrypted backup and a
+  credential-free completion CSV.
 
 Mailshift has no backend, analytics, mailbox connection, automated login, or
 credential custody.
@@ -170,11 +171,14 @@ Maya then uses the verification gates:
 [x] Independent login added
 [x] New address verified
 [x] Fresh login tested in a private window
-[ ] Old address removed
+[ ] Removed from active account settings
+[ ] Follow-up recheck scheduled
 ```
 
-She leaves the old address connected until a fresh login succeeds. Mailshift
-marks the account `verified` after the core address, recovery, verification,
+She leaves the old address connected until a fresh login succeeds. “Removed”
+means absent from active, user-facing settings; it does not prove deletion from
+provider logs, backups, archives, or legacy systems. Mailshift marks the
+account `verified` after the core address, recovery, verification,
 and fresh-login gates pass; old-address removal remains separately tracked.
 
 ### 4. Handle a service without a playbook
@@ -204,16 +208,17 @@ Mailshift copies this text but never sends it.
 At the end of a session, Maya downloads:
 
 - `mailshift-backup-2026-08-04.json` — encrypted, restorable with her existing
-  vault passphrase.
+  vault passphrase. She stores a copy off-device and exports again after major
+  changes.
 - `mailshift-report-2026-08-04.csv` — plaintext progress record without email
   addresses or private notes.
 
 Example report rows:
 
 ```csv
-"service","domain","category","status","address_changed","recovery_updated","alternate_login_added","new_address_verified","login_retested","old_address_removed"
-"GitHub","github.com","work","verified","true","true","true","true","true","false"
-"Chase","chase.com","finance","blocked","false","true","false","false","false","false"
+"service","domain","category","status","address_changed","recovery_updated","alternate_login_added","new_address_verified","login_retested","removed_from_active_settings","historical_retention","recheck_date"
+"GitHub","github.com","work","verified","true","true","true","true","true","false","unknown","2026-09-03"
+"Chase","chase.com","finance","blocked","false","true","false","false","false","false","unknown",""
 ```
 
 The result is not an automated provider transfer. It is a controlled record of
@@ -271,6 +276,17 @@ This protects a closed browser's stored workspace. It does not protect against
 a compromised device, browser extension, active cross-site scripting, weak
 passphrases, or a malicious deployment. Prefer a trusted local build, keep
 encrypted backups, and never put passwords or recovery codes in notes.
+
+Encrypted backup export is manual. Mailshift warns when no backup exists, when
+workspace changed after export, and when backup is more than 30 days old. Store
+backup on a different device or storage system and test restore before relying
+on it. Existing local vault can be replaced from unlock screen only after an
+explicit `REPLACE` confirmation.
+
+Mailshift verifies active user-facing settings only. It cannot prove deletion
+from provider logs, backups, archives, or legacy systems. Each account supports
+a 30-day, 90-day, or custom follow-up date; due rechecks return to priority
+queue.
 
 See [`SECURITY.md`](SECURITY.md) for the reporting policy.
 

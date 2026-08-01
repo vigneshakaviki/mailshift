@@ -37,6 +37,10 @@ const STATUS_WEIGHT: Record<MigrationStatus, number> = {
   verified: -100,
 }
 
+const DAY_IN_MILLISECONDS = 86_400_000
+
+export type BackupFreshness = 'never' | 'outdated' | 'stale' | 'current'
+
 export function createEmptyWorkspace(): Workspace {
   const now = new Date().toISOString()
   return {
@@ -66,6 +70,8 @@ export function createAccount(
     source: input.source,
     playbookId: input.playbookId,
     notes: input.notes ?? '',
+    recheckAt: '',
+    historicalRetention: 'unknown',
     checklist: { ...EMPTY_CHECKLIST },
     createdAt: now,
     updatedAt: now,
@@ -87,22 +93,68 @@ export function normalizeDomain(value: string): string {
   }
 }
 
-export function priorityScore(account: Account): number {
-  return CATEGORY_PRIORITY[account.category] + STATUS_WEIGHT[account.status]
+export function isRecheckDue(account: Account, now = new Date()): boolean {
+  if (!account.recheckAt) return false
+  const recheck = new Date(`${account.recheckAt}T00:00:00`)
+  return !Number.isNaN(recheck.getTime()) && recheck.getTime() <= now.getTime()
 }
 
-export function sortByPriority(accounts: Account[]): Account[] {
+export function scheduleRecheck(days: 30 | 90, now = new Date()): string {
+  const recheck = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate() + days,
+  )
+  return [
+    recheck.getFullYear(),
+    String(recheck.getMonth() + 1).padStart(2, '0'),
+    String(recheck.getDate()).padStart(2, '0'),
+  ].join('-')
+}
+
+export function backupFreshness(
+  workspace: Pick<Workspace, 'lastBackupAt' | 'updatedAt'>,
+  now = new Date(),
+): BackupFreshness {
+  if (!workspace.lastBackupAt) return 'never'
+  const lastBackup = new Date(workspace.lastBackupAt)
+  const lastUpdate = new Date(workspace.updatedAt)
+  if (Number.isNaN(lastBackup.getTime())) return 'never'
+  if (
+    !Number.isNaN(lastUpdate.getTime()) &&
+    lastUpdate.getTime() > lastBackup.getTime()
+  ) {
+    return 'outdated'
+  }
+  return now.getTime() - lastBackup.getTime() > 30 * DAY_IN_MILLISECONDS
+    ? 'stale'
+    : 'current'
+}
+
+export function priorityScore(account: Account, now = new Date()): number {
+  const recheckWeight = isRecheckDue(account, now) ? 150 : 0
+  return (
+    CATEGORY_PRIORITY[account.category] +
+    STATUS_WEIGHT[account.status] +
+    recheckWeight
+  )
+}
+
+export function sortByPriority(accounts: Account[], now = new Date()): Account[] {
   return [...accounts].sort((left, right) => {
-    const scoreDifference = priorityScore(right) - priorityScore(left)
+    const scoreDifference =
+      priorityScore(right, now) - priorityScore(left, now)
     if (scoreDifference !== 0) return scoreDifference
     return left.name.localeCompare(right.name)
   })
 }
 
-export function completionPercent(accounts: Account[]): number {
+export function completionPercent(accounts: Account[], now = new Date()): number {
   if (accounts.length === 0) return 0
-  const complete = accounts.filter((account) =>
-    ['verified', 'retained'].includes(account.status),
+  const complete = accounts.filter(
+    (account) =>
+      ['verified', 'retained'].includes(account.status) &&
+      !isRecheckDue(account, now),
   ).length
   return Math.round((complete / accounts.length) * 100)
 }

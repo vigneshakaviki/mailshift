@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { findKnownSite } from '../data/knownSites'
+import { isRecheckDue, scheduleRecheck } from '../lib/workspace'
 import type {
   Account,
   Checklist,
@@ -29,7 +30,8 @@ const CHECKLIST_ITEMS: Array<{
   {
     key: 'recoveryUpdated',
     label: 'Recovery path updated',
-    detail: 'Old email removed from recovery and security notifications.',
+    detail:
+      'Current recovery and security notifications point to destination address.',
   },
   {
     key: 'alternateLoginAdded',
@@ -48,8 +50,8 @@ const CHECKLIST_ITEMS: Array<{
   },
   {
     key: 'oldAddressRemoved',
-    label: 'Old address removed',
-    detail: 'Removed only after new login and recovery paths passed.',
+    label: 'Removed from active settings',
+    detail: 'No longer shown in user-facing settings after new paths passed.',
   },
 ]
 
@@ -63,6 +65,7 @@ export function AccountDetail({
   const closeButtonRef = useRef<HTMLButtonElement>(null)
   const [templateCopied, setTemplateCopied] = useState(false)
   const knownSite = playbook ? undefined : findKnownSite(account.domain)
+  const recheckDue = isRecheckDue(account)
 
   useEffect(() => {
     closeButtonRef.current?.focus()
@@ -85,6 +88,15 @@ export function AccountDetail({
       ...account,
       checklist,
       status: verified ? 'verified' : account.status,
+      updatedAt: new Date().toISOString(),
+    })
+  }
+
+  function updateRecheck(recheckAt: string) {
+    onChange({
+      ...account,
+      recheckAt,
+      historicalRetention: 'unknown',
       updatedAt: new Date().toISOString(),
     })
   }
@@ -275,6 +287,62 @@ Thank you.`
                   </span>
                 </label>
               ))}
+            </div>
+          </section>
+
+          <section
+            className="residual-risk"
+            aria-labelledby="residual-risk-heading"
+          >
+            <div>
+              <p className="step-label">Residual provider data</p>
+              <h3 id="residual-risk-heading">Historical retention unknown</h3>
+              <p>
+                Mailshift checks active, user-facing settings only. It cannot
+                prove deletion from provider logs, backups, archives, or legacy
+                systems.
+              </p>
+            </div>
+            <div className="recheck-controls">
+              <label>
+                Follow-up check date
+                <input
+                  type="date"
+                  value={account.recheckAt ?? ''}
+                  onChange={(event) => updateRecheck(event.target.value)}
+                />
+              </label>
+              <div className="button-row">
+                <button
+                  className="button button--quiet"
+                  type="button"
+                  onClick={() => updateRecheck(scheduleRecheck(30))}
+                >
+                  Recheck in 30 days
+                </button>
+                <button
+                  className="button button--quiet"
+                  type="button"
+                  onClick={() => updateRecheck(scheduleRecheck(90))}
+                >
+                  Recheck in 90 days
+                </button>
+                {account.recheckAt ? (
+                  <button
+                    className="text-button"
+                    type="button"
+                    onClick={() => updateRecheck('')}
+                  >
+                    Clear date
+                  </button>
+                ) : null}
+              </div>
+              {recheckDue ? (
+                <p className="recheck-due" role="status">
+                  Follow-up due. Recheck active login, recovery, and notification
+                  behavior.
+                </p>
+              ) : null}
             </div>
           </section>
 

@@ -1,18 +1,37 @@
 import { useState } from 'react'
+import type { BackupFreshness } from '../lib/workspace'
+
+const BACKUP_MESSAGES: Record<BackupFreshness, string> = {
+  never: 'No encrypted backup exported yet.',
+  outdated: 'Workspace changed after last backup.',
+  stale: 'Last backup is more than 30 days old.',
+  current: 'Backup matches current workspace.',
+}
+
+function formatBackupDate(value?: string): string | null {
+  if (!value) return null
+  const date = new Date(value)
+  return Number.isNaN(date.getTime()) ? null : date.toLocaleDateString()
+}
 
 interface SafetyPanelProps {
+  backupFreshness: BackupFreshness
+  lastBackupAt?: string
   onExportBackup: () => Promise<void>
   onExportReport: () => void
   onDeleteVault: () => void
 }
 
 export function SafetyPanel({
+  backupFreshness,
+  lastBackupAt,
   onExportBackup,
   onExportReport,
   onDeleteVault,
 }: SafetyPanelProps) {
   const [showDelete, setShowDelete] = useState(false)
   const [confirmation, setConfirmation] = useState('')
+  const backupDate = formatBackupDate(lastBackupAt)
 
   return (
     <div className="safety-page">
@@ -51,16 +70,33 @@ export function SafetyPanel({
         </article>
       </div>
 
+      <div className="critical-note">
+        <strong>Device boundary.</strong> Encryption protects a closed vault. A
+        compromised device, browser extension, or unlocked session can still
+        expose workspace data.
+      </div>
+
       <section className="card backup-card" aria-labelledby="backup-heading">
         <div>
           <p className="step-label">Recovery</p>
           <h2 id="backup-heading">Export encrypted backup</h2>
           <p>
-            Save after major migration sessions. Backup remains encrypted with
-            current passphrase.
+            {BACKUP_MESSAGES[backupFreshness]}{' '}
+            {lastBackupAt && backupDate ? (
+              <>
+                Last export{' '}
+                <time dateTime={lastBackupAt}>{backupDate}</time>
+                .{' '}
+              </>
+            ) : null}
+            Save after major migration sessions and store a copy off-device.
+            Backup remains encrypted with current passphrase.
           </p>
         </div>
-        <button className="button button--primary" onClick={onExportBackup}>
+        <button
+          className="button button--primary"
+          onClick={() => void onExportBackup()}
+        >
           Download encrypted backup
         </button>
       </section>

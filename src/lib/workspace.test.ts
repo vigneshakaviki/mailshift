@@ -1,10 +1,14 @@
 import { describe, expect, it } from 'vitest'
 import {
+  backupFreshness,
   completionPercent,
   createAccount,
+  createEmptyWorkspace,
   daysUntil,
+  isRecheckDue,
   mergeAccounts,
   normalizeDomain,
+  scheduleRecheck,
   sortByPriority,
 } from './workspace'
 
@@ -74,5 +78,42 @@ describe('workspace utilities', () => {
 
     expect(completionPercent([complete, pending])).toBe(50)
     expect(daysUntil('2026-08-02', new Date('2026-07-31T12:00:00'))).toBe(3)
+  })
+
+  it('tracks missing, outdated, stale, and current backups', () => {
+    const workspace = createEmptyWorkspace()
+    const now = new Date('2026-08-01T12:00:00Z')
+
+    expect(backupFreshness(workspace, now)).toBe('never')
+
+    workspace.lastBackupAt = '2026-07-31T12:00:00Z'
+    workspace.updatedAt = workspace.lastBackupAt
+    expect(backupFreshness(workspace, now)).toBe('current')
+
+    workspace.updatedAt = '2026-07-31T12:00:01Z'
+    expect(backupFreshness(workspace, now)).toBe('outdated')
+
+    workspace.lastBackupAt = '2026-06-01T12:00:00Z'
+    workspace.updatedAt = workspace.lastBackupAt
+    expect(backupFreshness(workspace, now)).toBe('stale')
+  })
+
+  it('schedules and surfaces follow-up checks', () => {
+    const account = createAccount({
+      name: 'Provider',
+      domain: 'provider.example',
+      category: 'other',
+      source: 'manual',
+    })
+    const start = new Date(2026, 7, 1, 12)
+
+    expect(scheduleRecheck(30, start)).toBe('2026-08-31')
+    expect(scheduleRecheck(90, start)).toBe('2026-10-30')
+
+    account.status = 'verified'
+    account.recheckAt = '2026-08-31'
+    expect(isRecheckDue(account, new Date(2026, 7, 30, 12))).toBe(false)
+    expect(isRecheckDue(account, new Date(2026, 7, 31, 12))).toBe(true)
+    expect(completionPercent([account], new Date(2026, 7, 31, 12))).toBe(0)
   })
 })

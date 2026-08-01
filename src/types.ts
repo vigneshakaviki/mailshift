@@ -49,6 +49,8 @@ export interface Account {
   source: 'manual' | 'safe_csv'
   playbookId?: string
   notes: string
+  recheckAt?: string
+  historicalRetention?: 'unknown'
   checklist: Checklist
   createdAt: string
   updatedAt: string
@@ -64,6 +66,7 @@ export interface Workspace {
   version: 1
   profile: MigrationProfile
   accounts: Account[]
+  lastBackupAt?: string
   createdAt: string
   updatedAt: string
 }

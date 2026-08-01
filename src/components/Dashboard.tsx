@@ -4,6 +4,7 @@ import type { Account, MigrationProfile } from '../types'
 import {
   completionPercent,
   daysUntil,
+  isRecheckDue,
   sortByPriority,
 } from '../lib/workspace'
 
@@ -22,13 +23,19 @@ export function Dashboard({
   onOpenAccount,
   onShowAccounts,
 }: DashboardProps) {
-  const progress = completionPercent(accounts)
+  const now = new Date()
+  const progress = completionPercent(accounts, now)
   const days = daysUntil(profile.deadline)
-  const priority = sortByPriority(accounts).filter(
-    (account) => !['verified', 'retained'].includes(account.status),
+  const priority = sortByPriority(accounts, now).filter(
+    (account) =>
+      !['verified', 'retained'].includes(account.status) ||
+      isRecheckDue(account, now),
   )
   const blocked = accounts.filter((account) => account.status === 'blocked').length
-  const verified = accounts.filter((account) => account.status === 'verified').length
+  const verified = accounts.filter(
+    (account) =>
+      account.status === 'verified' && !isRecheckDue(account, now),
+  ).length
 
   return (
     <div className="page-grid">
@@ -98,7 +105,7 @@ export function Dashboard({
             <p>
               {accounts.length === 0
                 ? 'Add accounts manually or import URL-only CSV.'
-                : 'Every account is verified or intentionally retained.'}
+                : 'Every account is verified or intentionally retained, with no follow-up due.'}
             </p>
             <button className="button button--secondary" onClick={onShowAccounts}>
               {accounts.length === 0 ? 'Build inventory' : 'Review accounts'}
@@ -123,8 +130,14 @@ export function Dashboard({
                 <span className={`category category--${account.category}`}>
                   {account.category}
                 </span>
-                <span className={`status status--${account.status}`}>
-                  {account.status.replace('_', ' ')}
+                <span
+                  className={`status status--${
+                    isRecheckDue(account, now) ? 'waiting' : account.status
+                  }`}
+                >
+                  {isRecheckDue(account, now)
+                    ? 'recheck due'
+                    : account.status.replace('_', ' ')}
                 </span>
               </button>
             ))}

@@ -20,6 +20,8 @@ import {
   writeEnvelope,
 } from './lib/storage'
 import {
+  backupFreshness,
+  type BackupFreshness,
   createEmptyWorkspace,
   mergeAccounts,
 } from './lib/workspace'
@@ -29,6 +31,14 @@ import type {
   MigrationProfile,
   Workspace,
 } from './types'
+
+const BACKUP_REMINDERS: Record<Exclude<BackupFreshness, 'current'>, string> = {
+  never:
+    'No off-device backup yet. Device or browser-profile loss would erase this workspace.',
+  outdated:
+    'Workspace changed since last backup. Export a fresh encrypted copy.',
+  stale: 'Encrypted backup is over 30 days old. Export a fresh copy.',
+}
 
 function downloadFile(contents: BlobPart, filename: string, type: string) {
   const url = URL.createObjectURL(new Blob([contents], { type }))
@@ -123,7 +133,12 @@ export default function App() {
   async function importBackup(contents: string) {
     const imported = parseEnvelope(JSON.parse(contents))
     writeEnvelope(imported)
+    saltRef.current = null
+    setSelectedId(null)
+    setWorkspace(null)
+    setKey(null)
     setEnvelope(imported)
+    setView('dashboard')
     setUnlockError('')
   }
 
@@ -207,13 +222,20 @@ export default function App() {
 
   async function exportBackup() {
     if (!saltRef.current) return
+    const exportedAt = new Date().toISOString()
+    const workspaceForBackup: Workspace = {
+      ...activeWorkspace,
+      lastBackupAt: exportedAt,
+      updatedAt: exportedAt,
+    }
     const latest = await encryptWorkspace(
-      activeWorkspace,
+      workspaceForBackup,
       activeKey,
       saltRef.current,
     )
     writeEnvelope(latest)
     setEnvelope(latest)
+    setWorkspace(workspaceForBackup)
     downloadFile(
       JSON.stringify(latest, null, 2),
       `mailshift-backup-${new Date().toISOString().slice(0, 10)}.json`,
@@ -232,7 +254,9 @@ export default function App() {
       'alternate_login_added',
       'new_address_verified',
       'login_retested',
-      'old_address_removed',
+      'removed_from_active_settings',
+      'historical_retention',
+      'recheck_date',
     ]
     const rows = activeWorkspace.accounts.map((account) => [
       account.name,
@@ -245,6 +269,8 @@ export default function App() {
       account.checklist.newAddressVerified,
       account.checklist.loginRetested,
       account.checklist.oldAddressRemoved,
+      account.historicalRetention ?? 'unknown',
+      account.recheckAt ?? '',
     ])
     const csv = [header, ...rows]
       .map((row) => row.map(csvCell).join(','))
@@ -266,6 +292,8 @@ export default function App() {
     setView('dashboard')
   }
 
+  const currentBackupFreshness = backupFreshness(activeWorkspace)
+
   return (
     <>
       <AppHeader
@@ -281,6 +309,25 @@ export default function App() {
         }}
       />
       <main className="app-main">
+        {currentBackupFreshness !== 'current' ? (
+          <section
+            className="backup-reminder"
+            aria-labelledby="backup-reminder-title"
+          >
+            <div>
+              <p className="step-label">Recovery check</p>
+              <h2 id="backup-reminder-title">Backup needs attention</h2>
+              <p>{BACKUP_REMINDERS[currentBackupFreshness]}</p>
+            </div>
+            <button
+              className="button button--secondary"
+              type="button"
+              onClick={() => setView('safety')}
+            >
+              Review backup
+            </button>
+          </section>
+        ) : null}
         {view === 'dashboard' ? (
           <Dashboard
             profile={workspace.profile}
@@ -301,6 +348,8 @@ export default function App() {
         {view === 'playbooks' ? <PlaybookLibrary /> : null}
         {view === 'safety' ? (
           <SafetyPanel
+            backupFreshness={currentBackupFreshness}
+            lastBackupAt={activeWorkspace.lastBackupAt}
             onExportBackup={exportBackup}
             onExportReport={exportReport}
             onDeleteVault={deleteVault}

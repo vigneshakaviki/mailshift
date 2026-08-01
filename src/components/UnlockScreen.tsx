@@ -23,6 +23,9 @@ export function UnlockScreen({
   const [passphrase, setPassphrase] = useState('')
   const [confirmation, setConfirmation] = useState('')
   const [localError, setLocalError] = useState('')
+  const [localNotice, setLocalNotice] = useState('')
+  const [replaceValue, setReplaceValue] = useState('')
+  const [showReplace, setShowReplace] = useState(false)
   const [resetValue, setResetValue] = useState('')
   const [showReset, setShowReset] = useState(false)
 
@@ -50,9 +53,15 @@ export function UnlockScreen({
     const file = event.target.files?.[0]
     if (!file) return
     setLocalError('')
+    setLocalNotice('')
 
     try {
       await onImportBackup(await file.text())
+      setPassphrase('')
+      setConfirmation('')
+      setReplaceValue('')
+      setShowReplace(false)
+      setLocalNotice('Backup imported. Unlock with its passphrase.')
     } catch (caught) {
       setLocalError(
         caught instanceof Error ? caught.message : 'Could not import backup.',
@@ -130,6 +139,12 @@ export function UnlockScreen({
             </p>
           ) : null}
 
+          {localNotice ? (
+            <p className="import-message" role="status">
+              {localNotice}
+            </p>
+          ) : null}
+
           <button className="button button--primary button--wide" disabled={busy}>
             {busy
               ? 'Working…'
@@ -140,21 +155,19 @@ export function UnlockScreen({
         </form>
 
         <div className="backup-import">
+          <input
+            ref={backupRef}
+            className="visually-hidden"
+            type="file"
+            aria-label="Import encrypted Mailshift backup"
+            accept=".json,application/json"
+            onChange={importBackup}
+          />
           <span>
             {hasVault
-              ? 'Forgot passphrase? Restore from backup if you have one.'
+              ? 'Forgot passphrase? Replace local vault from encrypted backup.'
               : 'Already have an encrypted backup?'}
           </span>
-          {!hasVault ? (
-            <input
-              ref={backupRef}
-              className="visually-hidden"
-              type="file"
-              aria-label="Import encrypted Mailshift backup"
-              accept=".json,application/json"
-              onChange={importBackup}
-            />
-          ) : null}
           {!hasVault ? (
             <button
               className="text-button"
@@ -164,7 +177,57 @@ export function UnlockScreen({
             >
               Import backup
             </button>
-          ) : null}
+          ) : !showReplace ? (
+            <button
+              className="text-button"
+              type="button"
+              disabled={busy}
+              onClick={() => {
+                setLocalNotice('')
+                setShowReset(false)
+                setResetValue('')
+                setShowReplace(true)
+              }}
+            >
+              Replace from backup
+            </button>
+          ) : (
+            <div className="stack backup-replace">
+              <p>
+                Valid backup will replace encrypted vault stored in this
+                browser. Keep existing backup until restore is verified.
+              </p>
+              <label>
+                Type REPLACE
+                <input
+                  value={replaceValue}
+                  onChange={(event) => setReplaceValue(event.target.value)}
+                  autoComplete="off"
+                />
+              </label>
+              <div className="button-row">
+                <button
+                  className="button button--quiet"
+                  type="button"
+                  disabled={busy}
+                  onClick={() => {
+                    setShowReplace(false)
+                    setReplaceValue('')
+                  }}
+                >
+                  Cancel
+                </button>
+                <button
+                  className="button button--danger"
+                  type="button"
+                  disabled={busy || replaceValue !== 'REPLACE'}
+                  onClick={() => backupRef.current?.click()}
+                >
+                  Choose backup
+                </button>
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="warning-note">
@@ -180,7 +243,11 @@ export function UnlockScreen({
                 className="text-button"
                 type="button"
                 disabled={busy}
-                onClick={() => setShowReset(true)}
+                onClick={() => {
+                  setShowReplace(false)
+                  setReplaceValue('')
+                  setShowReset(true)
+                }}
               >
                 Start reset
               </button>
