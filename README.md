@@ -1,20 +1,24 @@
 # Mailshift
 
-Private, local-first account and email migration tracker.
+Private, local-first email migration tracker for changing email address, updating recovery paths, and moving accounts safely.
+
+Machine-readable index: [llms.txt](llms.txt)
 
 Changing an email address is not only a mailbox move. The old address can be a
 login identifier, recovery channel, security-notification route, or federated
 identity for dozens of services. Mailshift turns that hidden dependency graph
-into a prioritized, verifiable migration plan.
+into a prioritized account migration checklist with source-linked playbooks.
 
 ## What it does
 
-- Builds an account inventory manually or from a strict URL-only CSV.
+- Builds an account inventory manually or from a strict URL-only CSV export.
 - Rejects credential-bearing import columns such as password, username, email,
   OTP, secret, recovery code, and notes.
 - Prioritizes identity, finance, government, health, and security accounts.
-- Tracks login, recovery, verification, and clean-up gates for every service.
-- Includes source-linked playbooks for common services.
+- Tracks login, recovery, verification, and cleanup gates for every service.
+- Includes 100 source-linked email change playbooks for common services.
+- Recognizes 5,000 popular domains for imports, naming, search, and generic
+  migration workflow.
 - Copies a neutral support-request template without including credentials.
 - Stores the workspace in an AES-256-GCM encrypted browser vault.
 - Exports a restorable encrypted backup and a credential-free completion CSV.
@@ -47,8 +51,9 @@ recovery.
 Import-ready dataset:
 [`examples/gmail-to-proton.csv`](examples/gmail-to-proton.csv). It contains 30
 real services across identity, finance, government, health, security, work,
-shopping, social, and entertainment categories. All account data is fictional;
-file contains no usernames, email addresses, passwords, or recovery secrets.
+shopping, social, and entertainment categories. Use it as a Gmail to Proton
+email migration example. All account data is fictional; file contains no
+usernames, email addresses, passwords, or recovery secrets.
 
 Inside Mailshift:
 
@@ -86,7 +91,7 @@ Open `http://127.0.0.1:4173`.
 Maya has used `maya.old@gmail.com` for 12 years. She wants to close that
 dependency before October 31 and use `maya@proton.me` everywhere. Her password
 manager contains more than 200 entries. Importable example contains 30
-high-impact accounts:
+high-impact accounts for a real email address change workflow:
 
 [`examples/gmail-to-proton.csv`](examples/gmail-to-proton.csv)
 
@@ -151,13 +156,13 @@ and fresh-login gates pass; old-address removal remains separately tracked.
 
 ### 4. Handle a service without a playbook
 
-CVS Health has no reviewed guide in starter directory. Maya opens its official
-support channel and uses Mailshift's neutral support-request template:
+Maya manually adds a regional utility that has no reviewed guide. Mailshift
+still tracks it and provides a neutral support-request template:
 
 ```text
-Subject: Request to update the email address on my CVS Health account
+Subject: Request to update the email address on my regional utility account
 
-Hello CVS Health support,
+Hello support,
 
 I am retiring the email address currently associated with my account and need
 to replace it with a new address while preserving my account data, purchases,
@@ -210,6 +215,27 @@ npm run build
 ```
 
 `npm run check` runs ESLint, unit tests, TypeScript, and the production build.
+
+### Refresh popular-site catalog
+
+Mailshift bundles 5,000 domains from a dated
+[Tranco](https://tranco-list.eu/) popularity snapshot. Tranco combines several
+rankings to reduce volatility and manipulation. This catalog recognizes sites;
+it does not establish trust, domain ownership, or reviewed email-change
+instructions. Confirm domains before signing in. Only entries in the playbook
+directory receive the verified-guide label.
+
+Refresh the bundled snapshot:
+
+```bash
+npm run update:sites
+npm run check
+```
+
+The update script downloads the latest Tranco list, skips DNS-only or invalid
+hostnames, keeps 5,000 usable domains, and writes
+`src/data/popular-domains.txt`. Browser runtime makes no catalog network
+request.
 
 ## Privacy and threat model
 
