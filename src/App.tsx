@@ -127,6 +127,17 @@ export default function App() {
     setUnlockError('')
   }
 
+  function resetVault() {
+    deleteEnvelope()
+    saltRef.current = null
+    setSelectedId(null)
+    setWorkspace(null)
+    setKey(null)
+    setEnvelope(null)
+    setView('dashboard')
+    setUnlockError('')
+  }
+
   const updateWorkspace = useCallback(
     (updater: (current: Workspace) => Workspace) => {
       setWorkspace((current) => {
@@ -163,6 +174,7 @@ export default function App() {
         onCreate={create}
         onUnlock={unlock}
         onImportBackup={importBackup}
+        onResetVault={resetVault}
       />
     )
   }
