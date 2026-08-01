@@ -1,0 +1,48 @@
+# Mailshift
+
+Private, local-first email migration tracker.
+
+## What this repo is
+
+- Tracks account changes when moving from one email address to another.
+- Uses a browser-only encrypted vault.
+- Rejects credential-bearing imports.
+- Exports encrypted backups and completion CSVs.
+
+## Best starting points
+
+- [README](README.md)
+- [Docs index](docs/index.md)
+- [Playbooks](src/data/playbooks.ts)
+- [Popular site catalog](src/data/popular-domains.txt)
+- [Catalog updater](scripts/update-site-catalog.mjs)
+- [CSV import](src/lib/csv.ts)
+- [Encrypted vault](src/lib/crypto.ts)
+- [Storage layer](src/lib/storage.ts)
+- [Main app](src/App.tsx)
+
+## Key commands
+
+```bash
+npm ci
+npm run dev -- --host 127.0.0.1
+npm run update:sites
+npm run check
+npm run build
+npm run preview -- --host 127.0.0.1
+```
+
+## Example data
+
+- [Gmail to Proton sample CSV](examples/gmail-to-proton.csv)
+
+## Important behavior
+
+- No backend.
+- No mailbox access.
+- No automatic login.
+- No password storage.
+- Local data is encrypted in browser storage.
+- 100 source-linked playbooks provide reviewed guides.
+- 5,000 additional domains provide recognition and generic workflow without a
+  verified-guide claim.
